@@ -1,0 +1,104 @@
+.name-entry-container {
+  max-width: 400px;
+  margin: 10px auto;
+  padding: 20px;
+
+  margin-bottom: 10px;
+}
+
+.name-entry-container >h2{
+  margin-bottom: 30px;
+}
+
+.name-entry-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.name-entry-form > div {
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 16px;
+  
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.joinButton {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.or-separator {
+  text-align: center;
+  font-size: 14px;
+  margin: 15px 0;
+}
+
+.socket-id-info {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.socket-id-info > div {
+  display: flex;
+  gap: 5px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  padding: 8px;
+  border-radius: 8px;
+  position: relative;
+  align-items: center;
+}
+
+.copied_message{
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+}
+
+.copy_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* .socket-id-info  div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  } */
+
+.socket-id-info span {
+  font-weight: bold;
+}
+
+.single_input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
