@@ -24,27 +24,29 @@ app.use(
 );
 
 const users = {};
- 
-io.on("connection", (socket) => {
-  console.log("user Connected");
-  console.log("ID", socket.id);
 
+// Handle incoming socket connections
+io.on("connection", (socket) => {
+  // Handle user registration
   socket.on("register", (userData) => {
     users[socket.id] = userData;
-    console.log(`${userData.name} has joined the chat with ID ${socket.id}`);
-    io.emit("userJoined", userData);
+
+    // Emit "userJoined" event to all clients in the same room
+    io.to(userData.room).emit("userJoined", userData);
   });
 
+  // Handle incoming messages
   socket.on("message", (data) => {
-    console.log(data, "backend data ");
-    console.log(users, "users data");
+    // Broadcast the message to all clients in the same room
     io.to(data.room).emit("receive", {
       message: data.message,
       id: data.id,
       sender: data.sender,
+      time: data.time,
     });
   });
 
+  // Handle disconnections
   socket.on("disconnect", () => {
     const disconnectedUser = users[socket.id];
     delete users[socket.id];

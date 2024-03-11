@@ -16,34 +16,29 @@ const App = () => {
   const [socketId, setSockedId] = useState("");
   const [messages, setMessages] = useState([]);
   const socket = io("http://localhost:3000");
+
+  // to get the msg sent or received time
+  const getCurrentTime = () => {
+    const now = new Date();
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    const formattedHours = hours.toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+
+    return `${formattedHours}:${minutes} ${ampm}`;
+  };
+
   useEffect(() => {
     socket.on("connect", () => {
       setSockedId(socket.id);
-      console.log("connected");
     });
 
-    socket.on("welcome", (s) => {
-      console.log(s);
-    });
-
-    socket.on("userJoined", (user) => {
-      console.log(user, "user ");
-      console.log(socketId, "sockeyt");
-
-      setChattingWith((prev) => [...prev, { user: user.name, id: user.id }]);
-      setMessages((messages) => [
-        ...messages,
-        {
-          message: `${user.name} has joined the chat`,
-          id: socketId,
-          isJoined: true,
-        },
-      ]);
-    });
     socket.on("receive", (s) => {
       setMessages((messages) => [
         ...messages,
-        { message: s?.message, id: s?.id, name: s?.sender },
+        { message: s?.message, id: s?.id, name: s?.sender, time: s?.time },
       ]);
     });
 
@@ -52,33 +47,65 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    socket.on("userJoined", (user) => {
+      setChattingWith((prev) => {
+        if (prev.length < 1) {
+          setMessages((messages) => [
+            ...messages,
+            {
+              message: `${user.name} has joined the chat`,
+              id: socketId,
+              isJoined: true,
+            },
+          ]);
+          return [...prev, { user: user.name, id: user.id }];
+        }
+        return prev;
+      });
+    });
+  }, [chattingWith, messages]);
+
+  const isJoined = messages[0]?.isJoined;
+
+  // submission of msg
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isJoined) {
+      return;
+    }
+
     if (message.trim().length < 1) {
       return;
     }
     setMessages((messages) => [
       ...messages,
-      { message: message, id: socketId },
+      { message: message, id: socketId, time: getCurrentTime() },
     ]);
     // setMessages((messages) => [...messages, message:message,id:socketId]);
-    socket.emit("message", { message, room, id: socketId, sender: userName });
+    socket.emit("message", {
+      message,
+      room,
+      id: socketId,
+      sender: userName,
+      time: getCurrentTime(),
+    });
     setMessage("");
   };
+
+  // register a user
 
   const handleRegistration = (e) => {
     e.preventDefault();
 
-    if (userName.trim() == "" || room.trim() == "") {
+    if (userName.trim() == "" || room.trim() == "" || room.trim() == socketId) {
       return;
     }
-
     setIsRegistered(true);
-
-    socket.emit("register", { id: socketId, name: userName });
+    socket.emit("register", { id: socketId, name: userName, room: room });
   };
 
-  console.log(chattingWith, "chatting bwith");
+  // scroll to bottom
   const messageContainerRef = useRef();
   useEffect(() => {
     if (messageContainerRef.current) {
@@ -86,13 +113,12 @@ const App = () => {
         messageContainerRef.current.scrollHeight;
     }
   }, [messages]);
-
   console.log(messages, "message");
-
+  console.log(chattingWith, "chahting");
   return (
     <div className="container">
       {isRegistered ? (
-        <div className="chat-container">
+        <div className="chat_container">
           <div className="header">
             <h1>YooChat</h1>
             {chattingWith.map((user) => (
@@ -110,10 +136,11 @@ const App = () => {
             )}
           </div>
 
-          <div ref={messageContainerRef} className="message-container">
+          <div ref={messageContainerRef} className="message_container">
             {messages.map((value, key) => (
               <div
                 key={key}
+                className={`msg_container `}
                 style={
                   value.id !== socketId && !value?.isJoined
                     ? { flexDirection: "row" }
@@ -121,8 +148,10 @@ const App = () => {
                 }
               >
                 {value.id !== socketId && !value?.isJoined && (
-                  <div className="avatar-container">
-                    <div className="avatar">{value?.name?.substring(0, 1)}</div>
+                  <div className="avatar_container">
+                    <div className="avatar">
+                      {value?.name?.substring(0, 1).toUpperCase()}
+                    </div>
                   </div>
                 )}
                 <div
@@ -130,16 +159,18 @@ const App = () => {
                     value.id === socketId ? "sent" : "received"
                   } ${value?.isJoined && "joined"}`}
                 >
-                  {value.message}
+                  <span className="single_msg"> {value.message}</span>
+                  <span className="time">{value.time}</span>
                 </div>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className="input-container">
+          <form onSubmit={handleSubmit} className="input_container">
             <input
               className="chatInput"
               type="text"
+              disabled={!isJoined}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message"
