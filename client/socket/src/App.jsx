@@ -113,8 +113,7 @@ const App = () => {
         messageContainerRef.current.scrollHeight;
     }
   }, [messages]);
-  console.log(messages, "message");
-  console.log(chattingWith, "chahting");
+
   return (
     <div className="container">
       {isRegistered ? (
